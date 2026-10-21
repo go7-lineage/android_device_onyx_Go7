@@ -26,6 +26,5 @@ PRODUCT_MODEL := Go7
 PRODUCT_MANUFACTURER := ONYX
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
-    BuildDesc="FP4-user 15 FP4.QREL.15.20.0 15.20.0 release-keys" \
     BuildFingerprint=Fairphone/FP4eea/FP4:15/FP4.QREL.15.20.0/15.20.0:user/release-keys \
     DeviceProduct=Go7
