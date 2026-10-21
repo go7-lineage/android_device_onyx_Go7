@@ -36,7 +36,6 @@ PRODUCT_PACKAGES += \
     audio.primary.lito \
     audio.r_submix.default \
     audio.usb.default \
-    audio_amplifier.lito \
     liba2dpoffload \
     libbatterylistener \
     libcomprcapture \
