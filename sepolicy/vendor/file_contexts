@@ -5,9 +5,6 @@
 /dev/stmvl53l1_ranging                                                     u:object_r:vl53l1_device:s0
 /sys/class/board_id/version                                                u:object_r:tct_mmitest_sysfs:s0
 
-# Fingerprint
-/dev/fpsensor                                                              u:object_r:fingerprint_device:s0
-
 # MAC (Bluetooth)
 /mnt/vendor/persist/t2m_param(/.*)?                                        u:object_r:persist_t2m_param_file:s0
 

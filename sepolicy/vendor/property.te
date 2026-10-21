@@ -1,6 +1,3 @@
-# Fingerprint
-vendor_internal_prop(vendor_fp_prop)
-
 # Tctd
 vendor_internal_prop(vendor_t2m_sys_prop)
 vendor_internal_prop(vendor_tct_default_prop)
