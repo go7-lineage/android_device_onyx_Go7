@@ -18,8 +18,8 @@ $(call inherit-product, device/onyx/Go7/device.mk)
 $(call inherit-product, vendor/lineage/config/common_full_tablet_wifionly.mk)
 
 # Boot animation
-TARGET_SCREEN_HEIGHT := 2340
-TARGET_SCREEN_WIDTH := 1080
+TARGET_SCREEN_HEIGHT := 1680
+TARGET_SCREEN_WIDTH := 1264
 
 # Device identifier. This must come after all inclusions.
 PRODUCT_NAME := lineage_Go7
