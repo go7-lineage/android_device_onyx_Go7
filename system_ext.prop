@@ -1,4 +1,4 @@
-# GPS
+# NTP
 persist.backup.ntpServer=0.pool.ntp.org
 
 # HID RAW
