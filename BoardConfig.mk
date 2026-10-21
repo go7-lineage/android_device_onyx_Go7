@@ -83,10 +83,15 @@ BOARD_KERNEL_CMDLINE := \
     service_locator.enable=1 \
     swiotlb=2048
 
+# Onyx prebuilt kernel, DTB and DTBO from stock firmware
+# FP4 kernel source is kept only for kernel headers
 BOARD_KERNEL_IMAGE_NAME := Image
-BOARD_KERNEL_SEPARATED_DTBO := true
+BOARD_PREBUILT_DTBIMAGE_DIR := $(DEVICE_PATH)/prebuilts/dtb
+BOARD_PREBUILT_DTBOIMAGE := $(DEVICE_PATH)/prebuilts/dtbo.img
+TARGET_FORCE_PREBUILT_KERNEL := true
 TARGET_KERNEL_CONFIG := vendor/lito-perf_defconfig vendor/fairphone/FP4.config
 TARGET_KERNEL_SOURCE := kernel/fairphone/sm7225
+TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilts/kernel
 
 # Kernel modules - Audio
 TARGET_MODULE_ALIASES += \
