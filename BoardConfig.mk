@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-DEVICE_PATH := device/fairphone/FP4
+DEVICE_PATH := device/onyx/Go7
 
 # A/B
 AB_OTA_UPDATER := true
@@ -44,7 +44,7 @@ BOARD_SUPPORTS_SOUND_TRIGGER := true
 BOARD_USES_ALSA_AUDIO := true
 
 # Bootloader
-TARGET_BOOTLOADER_BOARD_NAME := FP4
+TARGET_BOOTLOADER_BOARD_NAME := lito
 
 # Display
 TARGET_GRALLOC_HANDLE_HAS_RESERVED_SIZE := true
@@ -214,4 +214,4 @@ WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 
 # Inherit the proprietary files
-include vendor/fairphone/FP4/BoardConfigVendor.mk
+include vendor/onyx/Go7/BoardConfigVendor.mk

@@ -375,4 +375,4 @@ PRODUCT_PACKAGES += \
     firmware_WCNSS_qcom_cfg.ini_symlink
 
 # Inherit from the proprietary files makefile.
-$(call inherit-product, vendor/fairphone/FP4/FP4-vendor.mk)
+$(call inherit-product, vendor/onyx/Go7/Go7-vendor.mk)
