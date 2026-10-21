@@ -76,12 +76,14 @@ BOARD_KERNEL_CMDLINE := \
     androidboot.memcg=1 \
     androidboot.usbcontroller=a600000.dwc3 \
     cgroup.memory=nokmem,nosocket \
-    deferred_probe_timeout=300 \
+    console=ttyMSM0,115200,n8 \
+    earlycon=msm_geni_serial,0x888000 \
     loop.max_part=7 \
     lpm_levels.sleep_disabled=1 \
     msm_rtb.filter=0x237 \
     service_locator.enable=1 \
-    swiotlb=2048
+    swiotlb=2048 \
+    video=vfb:640x400,bpp=32,memsize=3072000
 
 # Onyx prebuilt kernel, DTB and DTBO from stock firmware
 # FP4 kernel source is kept only for kernel headers
