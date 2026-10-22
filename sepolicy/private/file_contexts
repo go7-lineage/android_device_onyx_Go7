@@ -1,0 +1,2 @@
+# Stock Onyx e-ink waveform, read by the kernel from the system root
+/waveform(/.*)?               u:object_r:rootfs:s0
