@@ -4,8 +4,8 @@
 //
 
 prebuilt_etc {
-    name: "fstab.default",
-    src: "fstab.default",
+    name: "fstab.emmc",
+    src: "fstab.emmc",
     vendor: true,
     ramdisk_available: true,
 }

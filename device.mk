@@ -122,8 +122,8 @@ PRODUCT_PACKAGES += \
 
 # Init
 PRODUCT_PACKAGES += \
-    fstab.default \
-    fstab.default.ramdisk \
+    fstab.emmc \
+    fstab.emmc.ramdisk \
     init.onyx.rc \
     init.qcom.early_boot.sh \
     init.qcom.post_boot.sh \
