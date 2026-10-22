@@ -10,4 +10,6 @@
     <!-- E-ink: every animation frame is a panel update (match stock) -->
     <fraction name="def_window_animation_scale">0%</fraction>
     <fraction name="def_window_transition_scale">0%</fraction>
+
+    <integer name="def_screen_off_timeout">300000</integer>
 </resources>
