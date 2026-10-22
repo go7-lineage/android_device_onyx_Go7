@@ -78,19 +78,6 @@
     <item name="wifi.scan">1</item>
     <item name="audio">26</item>
     <item name="video">66</item>
-    <item name="camera.flashlight">620</item>
-    <item name="camera.avg">410</item>
-    <item name="gps.on">5</item>
-    <item name="radio.active">171</item>
-    <item name="radio.scanning">6</item>
-    <array name="radio.on">
-        <value>88</value>
-        <value>8</value>
-    </array>
-    <item name="modem.controller.idle">6</item>
-    <item name="modem.controller.rx">221</item>
-    <item name="modem.controller.tx">203</item>
-    <item name="modem.controller.voltage">3700</item>
     <array name="memory.bandwidths">
         <value>16.5</value>
     </array>

@@ -165,18 +165,12 @@ $(call soong_config_set_bool,stagefright,target_disable_thumbnail_block_model,tr
 # Overlays
 PRODUCT_ENFORCE_RRO_TARGETS := *
 PRODUCT_PACKAGES += \
-    ApertureOverlayFP4 \
-    CarrierConfigResCommon \
     FrameworksResCommon \
     FrameworksResTarget \
-    LineageSdkOverlayFP4 \
     LineageSettingsProviderOverlayFP4 \
     NcmTetheringOverlay \
     SettingsProviderResCommon \
-    SettingsResCommon \
     SystemUIResCommon \
-    SystemUIResTarget \
-    TelephonyResCommon \
     WifiResCommon
 
 # Partitions
