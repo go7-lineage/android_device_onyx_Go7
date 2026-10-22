@@ -281,7 +281,6 @@ vendor/lib64/unnhal-acc-hvx.so
 # Onyx
 vendor/bin/wacom_flash
 vendor/etc/excluded-input-devices.xml
-vendor/etc/init/hw/init.onyx.rc
 vendor/etc/permissions/android.hardware.onyx_unavailable_features.xml
 
 # PASR manager

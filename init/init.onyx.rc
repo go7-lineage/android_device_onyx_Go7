@@ -1,0 +1,109 @@
+#
+# SPDX-FileCopyrightText: The LineageOS Project
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Go7 replacement for Onyx's stock init.onyx.rc (firmware 4.2, 238 lines,
+# sha256 3cf803a561f769de2156f2f2e39d329b296d98318af9fd427d3279dc16c67936)
+#
+# Only keeps some of the permissions that this port actually needs (frontlight,
+# power button LED, magnetic cover sensor stuff, etc)
+#
+# Many questionable things from stock init.onyx.rc have been dropped:
+#
+# - chmod 0666 /vendor/bin: Vendor is mounted read-only so this fails and
+#   does nothing anyway, nonsense. If it somehow did apply, any app could
+#   replace vendor executables
+#
+# - chmod 0666 /proc/partitions: Already world-readable and the kernel
+#   provides no write handler, nonsense no-op
+#
+# - chmod 0666 /sys/class/rtc/rtc0/wakealarm: Lets any app program the RTC
+#   to wake the device. Android schedules wakeups through kernel alarmtimer,
+#   nothing legitimate needs this
+#
+# - /sys/wacom_ts/.. and /sys/onyx_misc/wacom_pm: the Go7 has no Wacom chip.
+#   Leftovers from a shared rc used on multiple devices?
+#
+# - leds/vibrator/.., leds/onyx_aw_vib/.., onyx_misc/vibrator_ctl: This device
+#   has no vibrator
+#
+# - /dev/onyx/listener: world-writable FIFO, created with /system/bin/mkfifo,
+#   for Onyx's framework services. Nothing in the port needs it
+#
+# - onyx_active_pen/usi_..: Unused here, re-add if stylus support needs them
+#
+# - "on fs" /onyxconfig setup and service init_onyx_config: Unused here
+#
+# - rm /data/local/assets/update.zip on boot: cleanup stock OTAs, unused here
+#
+# - Factory test services started only by Onyx's ProductionTest app
+#
+# - touchmisc, onyx-sh, ctp_calibration, ...: no-ops on Go7
+#
+# - init-rpmb-production, init-rpmb-test, init-keybox, init-erase-keybox, ...:
+#   Factory provisioning tools that only ProductionTest started, gated on a
+#   has_keybox config which stock Go7 does not set. Unneeded here (and in stock),
+#   Widevine etc come separately
+#
+# - init-wlan-ftm, start_diag_mdlog, stop_diag_mdlog, ...: Qualcomm Wi-Fi factory
+#   test mode and modem diagnostic logging. Unneeded here
+#
+
+on boot
+    # Onyx touch, key and hall toggles
+    chown system system /sys/onyx_misc/captp_disable
+    chmod 0660 /sys/onyx_misc/captp_disable
+    chown system system /sys/onyx_misc/stylus_disable
+    chmod 0660 /sys/onyx_misc/stylus_disable
+    chown system system /sys/onyx_misc/key_control
+    chmod 0660 /sys/onyx_misc/key_control
+    chown system system /sys/onyx_misc/hall_ctl
+    chmod 0660 /sys/onyx_misc/hall_ctl
+    chown system system /sys/onyx_misc/onyx_keyboard_wakeup
+    chmod 0660 /sys/onyx_misc/onyx_keyboard_wakeup
+    chown system system /sys/onyx_misc/kb_touchpad_enable
+    chmod 0660 /sys/onyx_misc/kb_touchpad_enable
+    chmod 0444 /sys/onyx_misc/onyx_pcb_version
+    chmod 0444 /sys/onyx_misc/onyx_snd_cfg_version
+
+    # Frontlight: onyx_bl_br -> brightness; onyx_bl_ct -> warmth (both from 0 to 32)
+    chown system system /sys/class/backlight/onyx_bl_br/brightness
+    chmod 0660 /sys/class/backlight/onyx_bl_br/brightness
+    chown system system /sys/class/backlight/onyx_bl_ct/brightness
+    chmod 0660 /sys/class/backlight/onyx_bl_ct/brightness
+    chown system system /sys/class/backlight/warm/brightness
+    chmod 0660 /sys/class/backlight/warm/brightness
+    chown system system /sys/class/backlight/white/brightness
+    chmod 0660 /sys/class/backlight/white/brightness
+
+    # Charging control
+    chown system system /sys/class/power_supply/battery/charge_control_start_threshold
+    chmod 0660 /sys/class/power_supply/battery/charge_control_start_threshold
+    chown system system /sys/class/power_supply/battery/charge_control_end_threshold
+    chmod 0660 /sys/class/power_supply/battery/charge_control_end_threshold
+
+# Power button LED. Stock exposes only red and blue, hw appears capable of green too
+on property:vendor.onyx.blue_led=0
+    write /sys/class/leds/blue/brightness 0
+
+on property:vendor.onyx.blue_led=1
+    write /sys/class/leds/blue/brightness 255
+
+on property:vendor.onyx.red_led=0
+    write /sys/class/leds/red/brightness 0
+
+on property:vendor.onyx.red_led=1
+    write /sys/class/leds/red/brightness 255
+
+# Off-mode charging: the charger UI (uid system) draws through the e-ink driver
+on charger
+    chown system system /dev/ebc
+    chmod 0660 /dev/ebc
+
+# Qualcomm crash-dump (download) mode on demand
+on property:vendor.onyx_dump_enable=1
+    write /sys/module/msm_poweroff/parameters/download_mode 1
+
+on property:vendor.onyx_dump_enable=0
+    write /sys/module/msm_poweroff/parameters/download_mode 0
