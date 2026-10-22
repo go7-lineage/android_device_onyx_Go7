@@ -4,6 +4,6 @@
      SPDX-License-Identifier: BSD-3-Clause
 -->
 <resources>
-    <!-- Doze: does this device support STATE_DOZE?  -->
-    <bool name="doze_display_state_supported">true</bool>
+    <!-- E-ink: no animated privacy dot in the status bar (match stock) -->
+    <bool name="config_enablePrivacyDot">false</bool>
 </resources>

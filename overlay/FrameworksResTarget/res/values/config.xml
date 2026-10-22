@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <!-- E-ink: battery saver must not switch to the dark theme, which
+         redraws the whole panel inverted and ghosts more -->
+    <bool name="config_batterySaver_full_enableNightMode">false</bool>
+
+    <!-- E-ink: don't zoom the wallpaper when opening shade or apps (match stock) -->
+    <item name="config_wallpaperMaxScale" format="float" type="dimen">1.0</item>
+</resources>
