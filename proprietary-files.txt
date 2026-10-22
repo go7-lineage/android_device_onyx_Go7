@@ -2,14 +2,14 @@
 # Onyx/Go7/Go7:11/2026-04-21_13-50_4.2-rel_0421_19324b3ea/8525:user/release-keys
 
 # ACDB
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_Bluetooth_cal.acdb
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_General_cal.acdb
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_Global_cal.acdb
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_Handset_cal.acdb
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_Hdmi_cal.acdb
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_Headset_cal.acdb
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_Speaker_cal.acdb
-vendor/etc/acdbdata/QRD/lito-lagoonqrd-snd-card/QRD_Lagoon_workspaceFile.qwsp
+vendor/etc/acdbdata/MTP/MTP_Bluetooth_cal.acdb
+vendor/etc/acdbdata/MTP/MTP_General_cal.acdb
+vendor/etc/acdbdata/MTP/MTP_Global_cal.acdb
+vendor/etc/acdbdata/MTP/MTP_Handset_cal.acdb
+vendor/etc/acdbdata/MTP/MTP_Hdmi_cal.acdb
+vendor/etc/acdbdata/MTP/MTP_Headset_cal.acdb
+vendor/etc/acdbdata/MTP/MTP_Speaker_cal.acdb
+vendor/etc/acdbdata/MTP/MTP_workspaceFile.qwsp
 vendor/etc/acdbdata/nn_ns_models/fai__2.0.0_0.1__3.0.0_0.0__eai_1.00.pmd
 vendor/etc/acdbdata/nn_ns_models/fai__2.2.0_0.1__3.0.0_0.0__eai_1.00.pmd
 vendor/etc/acdbdata/nn_vad_models/fai_3.0.0_0.0_eai_1.00.pmd
