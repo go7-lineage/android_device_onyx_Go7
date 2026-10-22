@@ -4,6 +4,10 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
+    <!-- Allow 180-degree rotation when auto-rotate is on, so the reader can
+         be held with the page keys on either side (match stock) -->
+    <bool name="config_allowAllRotations">true</bool>
+
     <!-- E-ink: battery saver must not switch to the dark theme, which
          redraws the whole panel inverted and ghosts more -->
     <bool name="config_batterySaver_full_enableNightMode">false</bool>
