@@ -151,8 +151,6 @@ vendor/lib64/libtinyxml2_1.so
 
 # Display postprocessing
 vendor/bin/ppd
-vendor/etc/init/qdcmss.rc
-vendor/etc/init/vendor.display.color@1.0-service.rc
 vendor/lib64/libdisp-aba.so
 vendor/lib64/libdpps.so
 vendor/lib64/vendor.display.postproc@1.0.so
