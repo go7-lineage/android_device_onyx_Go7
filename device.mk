@@ -128,7 +128,6 @@ PRODUCT_PACKAGES += \
     init.qcom.usb.sh \
     init.qti.dcvs.sh \
     init.qti.early_init.sh \
-    init.qti.media.sh \
     init.target.rc \
     ueventd.qcom.rc
 
