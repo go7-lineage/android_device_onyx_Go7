@@ -1,0 +1,4 @@
+# Onyx
+persist.vendor.onyx.           u:object_r:vendor_onyx_prop:s0
+vendor.onyx.                   u:object_r:vendor_onyx_prop:s0
+vendor.onyx_dump_enable        u:object_r:vendor_onyx_prop:s0 exact bool
