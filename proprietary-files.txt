@@ -150,7 +150,6 @@ vendor/lib64/libsdmextension.so
 vendor/lib64/libtinyxml2_1.so
 
 # Display postprocessing
-vendor/bin/ppd
 vendor/lib64/libdisp-aba.so
 vendor/lib64/libdpps.so
 vendor/lib64/vendor.display.postproc@1.0.so
@@ -277,7 +276,6 @@ vendor/lib64/unnhal-acc-common.so
 vendor/lib64/unnhal-acc-hvx.so
 
 # Onyx
-vendor/bin/wacom_flash
 vendor/etc/excluded-input-devices.xml
 vendor/etc/permissions/android.hardware.onyx_unavailable_features.xml
 
