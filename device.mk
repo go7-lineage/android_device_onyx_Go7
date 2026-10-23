@@ -140,6 +140,12 @@ PRODUCT_PACKAGES += \
     IPACM_cfg.xml
 
 # Lineage Health
+$(call soong_config_set_bool,lineage_health,charging_control_supports_bypass,false)
+$(call soong_config_set_bool,lineage_health,charging_control_supports_limit,true)
+$(call soong_config_set_bool,lineage_health,charging_control_supports_toggle,false)
+$(call soong_config_set,lineage_health,charging_control_limit_start_path,/sys/class/power_supply/battery/charge_control_start_threshold)
+$(call soong_config_set,lineage_health,charging_control_limit_stop_path,/sys/class/power_supply/battery/charge_control_end_threshold)
+
 PRODUCT_PACKAGES += \
     vendor.lineage.health-service.default
 
