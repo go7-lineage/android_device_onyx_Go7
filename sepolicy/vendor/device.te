@@ -1,2 +1,1 @@
 type traceability_block_device, dev_type;
-type vl53l1_device, dev_type;
