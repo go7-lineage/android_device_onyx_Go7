@@ -84,9 +84,6 @@ PRODUCT_PACKAGES += \
 
 $(call soong_config_set_bool,QTI_GPT_UTILS,USE_BSG_FRAMEWORK,false)
 
-# Dalvik
-$(call inherit-product, frameworks/native/build/phone-xhdpi-6144-dalvik-heap.mk)
-
 # DebugFS
 PRODUCT_SET_DEBUGFS_RESTRICTIONS := true
 
