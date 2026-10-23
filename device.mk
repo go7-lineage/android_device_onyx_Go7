@@ -231,6 +231,14 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.verified_boot.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.verified_boot.xml
 
+# VINTF
+# Prebuilt Onyx kernel is 4.19.157, build requires >=4.19.325.
+# Skip kernel checks so OTA generation doesn't fail
+#
+# TODO: remove if we ever get kernel source and can rebase Onyx's
+# stuff to a newer kernel version?
+PRODUCT_OTA_ENFORCE_VINTF_KERNEL_REQUIREMENTS := false
+
 # WiFi
 PRODUCT_PACKAGES += \
     android.hardware.wifi-service \
