@@ -1,0 +1,5 @@
+# Frontlight: onyx_bl_br (brightness) and onyx_bl_ct (warmth)
+genfscon sysfs /devices/platform/soc/soc:onyx_bl/backlight                   u:object_r:sysfs_onyx_frontlight:s0
+
+# Onyx touch, key and hall toggles
+genfscon sysfs /onyx_misc                                                    u:object_r:sysfs_onyx_misc:s0

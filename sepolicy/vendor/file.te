@@ -1,0 +1,3 @@
+# Onyx sysfs nodes chowned by init.onyx.rc
+type sysfs_onyx_frontlight, fs_type, sysfs_type;
+type sysfs_onyx_misc, fs_type, sysfs_type;
