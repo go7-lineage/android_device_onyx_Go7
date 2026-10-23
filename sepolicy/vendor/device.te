@@ -1,0 +1,2 @@
+# Onyx e-ink controller (EBC), misc device 10:51
+type ebc_device, dev_type;
