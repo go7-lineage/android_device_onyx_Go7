@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Go7 port <go7-port@example.invalid>
+Date: Sat, 24 Oct 2026 12:00:00 +0000
+Subject: [PATCH] bpfloader: Don't fail on critical vendor objects on pre-5.10
+ kernels
+
+---
+ loader/Loader.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/loader/Loader.cpp b/loader/Loader.cpp
+index 08c6b6d..c82b889 100644
+--- a/loader/Loader.cpp
++++ b/loader/Loader.cpp
+@@ -574,7 +574,7 @@ static bool loadAllElfObjects() {
+ 
+             bool critical;
+             if (!loadProg(progPath.c_str(), &critical)) {
+-                if (critical) success = false;
++                if (critical && !isBpfLessKernel()) success = false;
+                 ALOGE("Failed to load object: %s", progPath.c_str());
+             }
+         }
+-- 
+2.54.0
+
