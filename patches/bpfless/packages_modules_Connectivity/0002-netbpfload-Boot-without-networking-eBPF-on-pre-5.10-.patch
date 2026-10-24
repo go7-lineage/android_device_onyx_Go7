@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Go7 port <go7-port@example.invalid>
+Date: Fri, 23 Oct 2026 12:00:00 +0000
+Subject: [PATCH 2/3] netbpfload: Boot without networking eBPF on pre-5.10
+ kernels
+
+---
+ bpf/loader/NetBpfLoad.cpp | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/bpf/loader/NetBpfLoad.cpp b/bpf/loader/NetBpfLoad.cpp
+index 7ba3247..7bc31f5 100644
+--- a/bpf/loader/NetBpfLoad.cpp
++++ b/bpf/loader/NetBpfLoad.cpp
+@@ -1566,16 +1566,19 @@ static int doLoad(char** argv, char * const envp[]) {
+         return 5;
+     }
+ 
++    const bool bpfLess = isBpfLessKernel();
++    if (bpfLess) ALOGW("Kernel %07x is older than 5.10: not loading networking eBPF.", kernelVer);
++
+     // 25Q2 bumps the kernel requirement up to 5.4
+     // see also: //system/netd/tests/kernel_test.cpp TestKernel54
+-    if (isAtLeast25Q2 && !isAtLeastKernelVersion(5, 4)) {
++    if (isAtLeast25Q2 && !isAtLeastKernelVersion(5, 4) && !bpfLess) {
+         ALOGE("Android 25Q2 requires kernel 5.4.");
+         return 6;
+     }
+ 
+     // 25Q4 bumps the kernel requirement up to 5.10
+     // see also: //system/netd/tests/kernel_test.cpp TestKernel510
+-    if (isAtLeast25Q4 && !isAtLeastKernelVersion(5, 10)) {
++    if (isAtLeast25Q4 && !isAtLeastKernelVersion(5, 10) && !bpfLess) {
+         ALOGE("Android 25Q4 requires kernel 5.10.");
+         return 7;
+     }
+@@ -1831,7 +1834,7 @@ static int doLoad(char** argv, char * const envp[]) {
+ 
+     auto start = steady_clock::now();
+     // Load all ELF objects, create programs and maps, and pin them
+-    if (!loadAllObjects()) {
++    if (!bpfLess && !loadAllObjects()) {
+         ALOGE("=== CRITICAL FAILURE LOADING BPF PROGRAMS ===");
+         ALOGE("If this triggers reliably, you're probably missing kernel options or patches.");
+         ALOGE("If this triggers randomly, you might be hitting some memory allocation "
+@@ -1844,7 +1847,7 @@ static int doLoad(char** argv, char * const envp[]) {
+     auto end = steady_clock::now();
+     auto timeTaken = duration_cast<milliseconds>(end - start).count();
+     ALOGD("Loaded total objects took %lld ms", timeTaken);
+-    {
++    if (!bpfLess) {
+         uint32_t key = BPF_KERNEL_STATS_MAP_KEY_TOTAL_OBJS_LOAD_TIME_MS;
+         if (writeToMapEntry(bpfKernelStatsMapFd, &key, &timeTaken, BPF_ANY)) {
+             ALOGE("Failed to write object load time to kernel stats map, err: [%d, %s]",
+-- 
+2.54.0
+

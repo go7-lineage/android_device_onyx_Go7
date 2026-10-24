@@ -1,0 +1,301 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Go7 port <go7-port@example.invalid>
+Date: Fri, 23 Oct 2026 12:00:00 +0000
+Subject: [PATCH 3/3] Run without networking eBPF on pre-5.10 kernels
+
+---
+ bpf/dns_helper/DnsHelper.cpp                  |  2 ++
+ bpf/netd/BpfHandler.cpp                       |  8 ++++--
+ .../src/android/net/ConnectivityManager.java  |  2 ++
+ .../libs/libnetworkstats/BpfNetworkStats.cpp  |  7 ++++-
+ .../server/net/BpfInterfaceMapHelper.java     |  3 +++
+ .../server/net/NetworkStatsService.java       | 23 +++++++++++-----
+ ...id_server_connectivity_ClatCoordinator.cpp |  5 ++++
+ .../src/com/android/server/BpfNetMaps.java    | 27 +++++++++++++++++++
+ .../android/server/ConnectivityService.java   |  2 ++
+ .../server/connectivity/ClatCoordinator.java  |  3 +++
+ 10 files changed, 73 insertions(+), 9 deletions(-)
+
+diff --git a/bpf/dns_helper/DnsHelper.cpp b/bpf/dns_helper/DnsHelper.cpp
+index 3372908..f5407b5 100644
+--- a/bpf/dns_helper/DnsHelper.cpp
++++ b/bpf/dns_helper/DnsHelper.cpp
+@@ -22,6 +22,7 @@
+ static android::net::DnsBpfHelper sDnsBpfHelper;
+ 
+ int ADnsHelper_init() {
++  if (android::bpf::isBpfLessKernel()) return 0;
+   auto result = sDnsBpfHelper.init();
+   if (!result.ok()) return -result.error().code();
+ 
+@@ -29,6 +30,7 @@ int ADnsHelper_init() {
+ }
+ 
+ int ADnsHelper_isUidNetworkingBlocked(uid_t uid, bool metered) {
++  if (android::bpf::isBpfLessKernel()) return 0;
+   auto result = sDnsBpfHelper.isUidNetworkingBlocked(uid, metered);
+   if (!result.ok()) return -result.error().code();
+ 
+diff --git a/bpf/netd/BpfHandler.cpp b/bpf/netd/BpfHandler.cpp
+index 9b57548..2a88191 100644
+--- a/bpf/netd/BpfHandler.cpp
++++ b/bpf/netd/BpfHandler.cpp
+@@ -317,8 +317,12 @@ Result<void> BpfHandler::init(const char* cg2_path) {
+     //
+     if (!isAtLeast25Q2) waitForBpf();
+ 
+-    RETURN_IF_NOT_OK(initPrograms(cg2_path));
+-    RETURN_IF_NOT_OK(initMaps());
++    if (bpf::isBpfLessKernel()) {
++        ALOGW("Kernel older than 5.10: running without networking eBPF.");
++    } else {
++        RETURN_IF_NOT_OK(initPrograms(cg2_path));
++        RETURN_IF_NOT_OK(initMaps());
++    }
+ 
+     if (isAtLeast25Q2) {
+         struct rlimit limit = {
+diff --git a/framework/src/android/net/ConnectivityManager.java b/framework/src/android/net/ConnectivityManager.java
+index 900d607..059f872 100644
+--- a/framework/src/android/net/ConnectivityManager.java
++++ b/framework/src/android/net/ConnectivityManager.java
+@@ -82,6 +82,7 @@ import com.android.internal.annotations.GuardedBy;
+ import com.android.internal.annotations.VisibleForTesting;
+ import com.android.modules.utils.build.SdkLevel;
+ import com.android.net.flags.Flags;
++import com.android.net.module.util.BpfUtils;
+ 
+ import libcore.net.event.NetworkEventDispatcher;
+ 
+@@ -6808,6 +6809,7 @@ public class ConnectivityManager {
+             throw new IllegalStateException(
+                     "isUidNetworkingBlocked is not supported on pre-U devices");
+         }
++        if (BpfUtils.isBpfLessKernel()) return false;
+         final NetworkStackBpfNetMaps reader = NetworkStackBpfNetMaps.getInstance();
+         // Note that before V, the data saver status in bpf is written by ConnectivityService
+         // when receiving {@link #ACTION_RESTRICT_BACKGROUND_CHANGED}. Thus,
+diff --git a/service-t/native/libs/libnetworkstats/BpfNetworkStats.cpp b/service-t/native/libs/libnetworkstats/BpfNetworkStats.cpp
+index e2b6e1e..ab5a35e 100644
+--- a/service-t/native/libs/libnetworkstats/BpfNetworkStats.cpp
++++ b/service-t/native/libs/libnetworkstats/BpfNetworkStats.cpp
+@@ -93,7 +93,7 @@ static Result<IfaceValue> ifindex2name(const uint32_t ifindex) {
+ }
+ 
+ void bpfRegisterIface(const char* iface) {
+-    if (!iface) return;
++    if (!iface || isBpfLessKernel()) return;
+     if (strlen(iface) >= sizeof(IfaceValue)) return;
+     uint32_t ifindex = if_nametoindex(iface);
+     if (!ifindex) return;
+@@ -115,6 +115,7 @@ int bpfGetUidStatsInternal(uid_t uid, StatsValue* stats,
+ }
+ 
+ int bpfGetUidStats(uid_t uid, StatsValue* stats) {
++    if (isBpfLessKernel()) return -EOPNOTSUPP;
+     static BpfMapRO<uint32_t, StatsValue> appUidStatsMap(APP_UID_STATS_MAP_PATH);
+     return bpfGetUidStatsInternal(uid, stats, appUidStatsMap);
+ }
+@@ -170,6 +171,7 @@ int bpfGetIfaceStatsInternal(const char* iface, StatsValue* stats,
+ }
+ 
+ int bpfGetIfaceStats(const char* iface, StatsValue* stats) {
++    if (isBpfLessKernel()) return -EOPNOTSUPP;
+     return bpfGetIfaceStatsInternal(iface, stats, getIfaceStatsMap(), ifindex2name);
+ }
+ 
+@@ -185,6 +187,7 @@ int bpfGetIfIndexStatsInternal(uint32_t ifindex, StatsValue* stats,
+ }
+ 
+ int bpfGetIfIndexStats(int ifindex, StatsValue* stats) {
++    if (isBpfLessKernel()) return -EOPNOTSUPP;
+     return bpfGetIfIndexStatsInternal(ifindex, stats, getIfaceStatsMap());
+ }
+ 
+@@ -253,6 +256,7 @@ int parseBpfNetworkStatsDetailInternal(std::vector<stats_line>& lines,
+ }
+ 
+ int parseBpfNetworkStatsDetail(std::vector<stats_line>* lines) {
++    if (isBpfLessKernel()) return 0;
+     static BpfMapRO<uint32_t, uint32_t> configurationMap(CONFIGURATION_MAP_PATH);
+     static BpfMap<StatsKey, StatsValue> statsMapA(STATS_MAP_A_PATH);
+     static BpfMap<StatsKey, StatsValue> statsMapB(STATS_MAP_B_PATH);
+@@ -317,6 +321,7 @@ int parseBpfNetworkStatsDevInternal(std::vector<stats_line>& lines,
+ }
+ 
+ int parseBpfNetworkStatsDev(std::vector<stats_line>* lines) {
++    if (isBpfLessKernel()) return 0;
+     return parseBpfNetworkStatsDevInternal(*lines, getIfaceStatsMap(), ifindex2name);
+ }
+ 
+diff --git a/service-t/src/com/android/server/net/BpfInterfaceMapHelper.java b/service-t/src/com/android/server/net/BpfInterfaceMapHelper.java
+index d569b78..2ca6282 100644
+--- a/service-t/src/com/android/server/net/BpfInterfaceMapHelper.java
++++ b/service-t/src/com/android/server/net/BpfInterfaceMapHelper.java
+@@ -25,7 +25,9 @@ import androidx.annotation.RequiresApi;
+ import com.android.internal.annotations.VisibleForTesting;
+ import com.android.net.module.util.BpfDump;
+ import com.android.net.module.util.BpfMap;
++import com.android.net.module.util.BpfUtils;
+ import com.android.net.module.util.IBpfMap;
++import com.android.net.module.util.InMemoryBpfMap;
+ import com.android.net.module.util.Struct.S32;
+ 
+ /**
+@@ -55,6 +57,7 @@ public class BpfInterfaceMapHelper {
+     public static class Dependencies {
+         /** Create BpfMap for updating interface and index mapping. */
+         public IBpfMap<S32, InterfaceMapValue> getInterfaceMap() {
++            if (BpfUtils.isBpfLessKernel()) return new InMemoryBpfMap<>();
+             try {
+                 return new BpfMap<>(IFACE_INDEX_NAME_MAP_PATH,
+                     BpfMap.BPF_F_RDONLY, S32.class, InterfaceMapValue.class);
+diff --git a/service-t/src/com/android/server/net/NetworkStatsService.java b/service-t/src/com/android/server/net/NetworkStatsService.java
+index 14809fb..b50b1ff 100644
+--- a/service-t/src/com/android/server/net/NetworkStatsService.java
++++ b/service-t/src/com/android/server/net/NetworkStatsService.java
+@@ -183,9 +183,11 @@ import com.android.net.module.util.BestClock;
+ import com.android.net.module.util.BinderUtils;
+ import com.android.net.module.util.BpfDump;
+ import com.android.net.module.util.BpfMap;
++import com.android.net.module.util.BpfUtils;
+ import com.android.net.module.util.CollectionUtils;
+ import com.android.net.module.util.DeviceConfigUtils;
+ import com.android.net.module.util.IBpfMap;
++import com.android.net.module.util.InMemoryBpfMap;
+ import com.android.net.module.util.LocationPermissionChecker;
+ import com.android.net.module.util.NetworkStatsUtils;
+ import com.android.net.module.util.PermissionUtils;
+@@ -680,12 +682,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
+                 mNetworkStatsSubscriptionsMonitor);
+         mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
+         mInterfaceMapHelper = mDeps.makeBpfInterfaceMapHelper();
+-        mUidCounterSetMap = mDeps.getUidCounterSetMap();
+-        mCookieTagMap = mDeps.getCookieTagMap();
+-        mStatsMapA = mDeps.getStatsMapA();
+-        mStatsMapB = mDeps.getStatsMapB();
+-        mAppUidStatsMap = mDeps.getAppUidStatsMap();
+-        mIfaceStatsMap = mDeps.getIfaceStatsMap();
++        if (BpfUtils.isBpfLessKernel()) {
++            mUidCounterSetMap = new InMemoryBpfMap<>();
++            mCookieTagMap = new InMemoryBpfMap<>();
++            mStatsMapA = new InMemoryBpfMap<>();
++            mStatsMapB = new InMemoryBpfMap<>();
++            mAppUidStatsMap = new InMemoryBpfMap<>();
++            mIfaceStatsMap = new InMemoryBpfMap<>();
++        } else {
++            mUidCounterSetMap = mDeps.getUidCounterSetMap();
++            mCookieTagMap = mDeps.getCookieTagMap();
++            mStatsMapA = mDeps.getStatsMapA();
++            mStatsMapB = mDeps.getStatsMapB();
++            mAppUidStatsMap = mDeps.getAppUidStatsMap();
++            mIfaceStatsMap = mDeps.getIfaceStatsMap();
++        }
+         // To prevent any possible races, the flag is not allowed to change until rebooting.
+         mSupportEventLogger = mDeps.supportEventLogger(mContext);
+         mStoreTransportTypes =
+diff --git a/service/jni/com_android_server_connectivity_ClatCoordinator.cpp b/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
+index 70991eb..c4c64d0 100644
+--- a/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
++++ b/service/jni/com_android_server_connectivity_ClatCoordinator.cpp
+@@ -113,6 +113,11 @@ static void verifyClatPerms() {
+     // Clat BPF was only mainlined during T.
+     if (!modules::sdklevel::IsAtLeastT()) return;
+ 
++    if (bpf::isBpfLessKernel()) {
++        if (fatal) abort();
++        return;
++    }
++
+     V("/sys/fs/bpf", S_IFDIR|S_ISVTX|0777, ROOT, ROOT, "fs_bpf", DIR);
+ 
+     V("/sys/fs/bpf/net_shared", S_IFDIR|01777, ROOT, ROOT, "fs_bpf_net_shared", DIR);
+diff --git a/service/src/com/android/server/BpfNetMaps.java b/service/src/com/android/server/BpfNetMaps.java
+index c1a4799..f5a4ed3 100644
+--- a/service/src/com/android/server/BpfNetMaps.java
++++ b/service/src/com/android/server/BpfNetMaps.java
+@@ -126,8 +126,10 @@ import com.android.modules.utils.build.SdkLevel;
+ import com.android.net.module.util.BpfBoolean;
+ import com.android.net.module.util.BpfDump;
+ import com.android.net.module.util.BpfMap;
++import com.android.net.module.util.BpfUtils;
+ import com.android.net.module.util.CollectionUtils;
+ import com.android.net.module.util.IBpfMap;
++import com.android.net.module.util.InMemoryBpfMap;
+ import com.android.net.module.util.IBpfMap.ThrowingBiConsumer;
+ import com.android.net.module.util.SdkUtil;
+ import com.android.net.module.util.SingleWriterBpfMap;
+@@ -615,8 +617,33 @@ public class BpfNetMaps {
+         }
+     }
+ 
++    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
++    private static void useInMemoryMaps() {
++        Log.w(TAG, "Kernel older than 5.10: no networking eBPF, firewall rules are not enforced");
++        sConfigurationMap = new InMemoryBpfMap<>();
++        sUidOwnerMap = new InMemoryBpfMap<>();
++        sUidPermissionMap = new InMemoryBpfMap<>();
++        sUidPermissionChunkMap = new InMemoryBpfMap<>();
++        sCookieTagMap = new InMemoryBpfMap<>();
++        sDataSaverEnabledMap = new InMemoryBpfMap<>();
++        sIngressDiscardMap = new InMemoryBpfMap<>();
++        sLocalNetBlockedUidMap = new InMemoryBpfMap<>();
++        synchronized (sLocalNetAccessLock) {
++            sLocalNetAccessMap = new InMemoryBpfMap<>();
++            sLocalNetUidHostAllowlistMap = new InMemoryBpfMap<>();
++            sLocalNetCacheGenerationIdMap = new InMemoryBpfMap<>();
++        }
++        sUidMigrationEnabledBpfBoolean = new BpfBoolean(new InMemoryBpfMap<>());
++        sPermissionPropagationEnabledBpfBoolean = new BpfBoolean(new InMemoryBpfMap<>());
++        sLocalNetNoteOpsEnabledBpfBoolean = new BpfBoolean(new InMemoryBpfMap<>());
++        sLoopbackAccessMetricsEnabledBpfBoolean = new BpfBoolean(new InMemoryBpfMap<>());
++        sLoopbackChecksEnabledBpfBoolean = new BpfBoolean(new InMemoryBpfMap<>());
++        sLoopbackAccessMetricsEnabled = false;
++    }
++
+     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+     private static void initBpfMaps(final Dependencies deps) {
++        if (BpfUtils.isBpfLessKernel()) useInMemoryMaps();
+         if (sConfigurationMap == null) {
+             sConfigurationMap = getConfigurationMap();
+         }
+diff --git a/service/src/com/android/server/ConnectivityService.java b/service/src/com/android/server/ConnectivityService.java
+index 7682d50..7ecaa61 100644
+--- a/service/src/com/android/server/ConnectivityService.java
++++ b/service/src/com/android/server/ConnectivityService.java
+@@ -2280,8 +2280,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
+          * Creates a LocalNetEventListener.
+          */
+         @RequiresApi(Build.VERSION_CODES.BAKLAVA)
++        @Nullable
+         public LocalNetEventListener getLocalNetEventListener(
+                 Context context, Looper looper, boolean metricsEnabled, boolean noteOpsEnabled) {
++            if (BpfUtils.isBpfLessKernel()) return null;
+             return new LocalNetEventListener(
+                     context, looper, metricsEnabled, noteOpsEnabled);
+         }
+diff --git a/service/src/com/android/server/connectivity/ClatCoordinator.java b/service/src/com/android/server/connectivity/ClatCoordinator.java
+index 8266a87..486d502 100644
+--- a/service/src/com/android/server/connectivity/ClatCoordinator.java
++++ b/service/src/com/android/server/connectivity/ClatCoordinator.java
+@@ -43,7 +43,9 @@ import com.android.internal.annotations.VisibleForTesting;
+ import com.android.internal.util.IndentingPrintWriter;
+ import com.android.net.module.util.BpfDump;
+ import com.android.net.module.util.BpfMap;
++import com.android.net.module.util.BpfUtils;
+ import com.android.net.module.util.IBpfMap;
++import com.android.net.module.util.InMemoryBpfMap;
+ import com.android.net.module.util.InterfaceParams;
+ import com.android.net.module.util.Struct.S64;
+ import com.android.net.module.util.TcUtils;
+@@ -281,6 +283,7 @@ public class ClatCoordinator {
+         /** Get cookie tag map */
+         @Nullable
+         public IBpfMap<S64, CookieTagMapValue> getBpfCookieTagMap() {
++            if (BpfUtils.isBpfLessKernel()) return new InMemoryBpfMap<>();
+             try {
+                 // also read and written from other locations
+                 return new BpfMap<>(COOKIE_TAG_MAP_PATH,
+-- 
+2.54.0
+

@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Go7 port <go7-port@example.invalid>
+Date: Sat, 24 Oct 2026 12:00:00 +0000
+Subject: [PATCH] posix_spawn: Fall back when close_range() is unavailable
+
+---
+ libc/bionic/spawn.cpp | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/libc/bionic/spawn.cpp b/libc/bionic/spawn.cpp
+index f1b8eb0..0ab1988 100644
+--- a/libc/bionic/spawn.cpp
++++ b/libc/bionic/spawn.cpp
+@@ -154,7 +154,18 @@ static void ApplyAttrs(short flags, const posix_spawnattr_t* attr) {
+ 
+   if ((flags & POSIX_SPAWN_CLOEXEC_DEFAULT) != 0) {
+     // mark all open fds except stdin/out/err as close-on-exec
+-    if (close_range(3, ~0U, CLOSE_RANGE_CLOEXEC)) _exit(127);
++    if (close_range(3, ~0U, CLOSE_RANGE_CLOEXEC)) {
++      if (errno != ENOSYS && errno != EINVAL) _exit(127);
++      rlimit rl;
++      if (getrlimit(RLIMIT_NOFILE, &rl) == -1) _exit(127);
++      const rlim_t max_fd = (rl.rlim_cur > (1 << 20)) ? (1 << 20) : rl.rlim_cur;
++      for (rlim_t fd = 3; fd < max_fd; ++fd) {
++        int fd_flags = fcntl(fd, F_GETFD);
++        if (fd_flags != -1 && (fd_flags & FD_CLOEXEC) == 0) {
++          if (fcntl(fd, F_SETFD, fd_flags | FD_CLOEXEC) == -1) _exit(127);
++        }
++      }
++    }
+   }
+ }
+ 
+-- 
+2.54.0
+

@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Go7 port <go7-port@example.invalid>
+Date: Fri, 23 Oct 2026 12:00:00 +0000
+Subject: [PATCH] BandwidthController: Skip xt_bpf rules on pre-5.10 kernels
+
+---
+ server/Android.bp              | 1 +
+ server/BandwidthController.cpp | 6 ++++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/server/Android.bp b/server/Android.bp
+index 44dc816..d33968f 100644
+--- a/server/Android.bp
++++ b/server/Android.bp
+@@ -46,6 +46,7 @@ cc_library_static {
+         "system/netd/include",
+         "system/netd/server/binder",
+     ],
++    header_libs: ["bpf_headers"],
+     srcs: [
+         "BandwidthController.cpp",
+         "Controllers.cpp",
+diff --git a/server/BandwidthController.cpp b/server/BandwidthController.cpp
+index 8a96738..67a047f 100644
+--- a/server/BandwidthController.cpp
++++ b/server/BandwidthController.cpp
+@@ -47,6 +47,7 @@
+ #include <cutils/properties.h>
+ #include <log/log.h>
+ 
++#include <bpf/KernelUtils.h>
+ #include <netdutils/Syscalls.h>
+ #include "BandwidthController.h"
+ #include "Controllers.h"
+@@ -252,6 +253,11 @@ std::vector<std::string> getBasicAccountingCommands() {
+             ("-A bw_mangle_POSTROUTING -m bpf --object-pinned " XT_BPF_EGRESS_PROG_PATH),
+             COMMIT_AND_CLOSE};
+     // clang-format on
++    if (android::bpf::isBpfLessKernel()) {
++        std::erase_if(ipt_basic_accounting_commands, [](const std::string& cmd) {
++            return cmd.find(" -m bpf ") != std::string::npos;
++        });
++    }
+     return ipt_basic_accounting_commands;
+ }
+ 
+-- 
+2.54.0
+
