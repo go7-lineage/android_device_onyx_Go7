@@ -32,6 +32,8 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('libtinyxml2.so', 'libtinyxml2-v34.so'),
     'vendor/lib64/libwvhidl.so': blob_fixup()
         .add_needed('libcrypto_shim.so'),
+    'vendor/bin/hw/vendor.qti.hardware.display.composer-service': blob_fixup()
+        .add_needed('libeink_shim.so'),
 }  # fmt: skip
 
 module = ExtractUtilsModule(

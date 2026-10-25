@@ -91,6 +91,7 @@ PRODUCT_SET_DEBUGFS_RESTRICTIONS := true
 PRODUCT_PACKAGES += \
     init.qti.display_boot.rc \
     init.qti.display_boot.sh \
+    libeink_shim \
     vendor.qti.hardware.memtrack-service
 
 PRODUCT_COPY_FILES += \

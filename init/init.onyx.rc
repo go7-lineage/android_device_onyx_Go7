@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import init.eink_shim.rc
+
 # Go7 replacement for Onyx's stock init.onyx.rc (firmware 4.2, 238 lines,
 # sha256 3cf803a561f769de2156f2f2e39d329b296d98318af9fd427d3279dc16c67936)
 #
