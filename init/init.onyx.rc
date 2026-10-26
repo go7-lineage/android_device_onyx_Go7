@@ -102,6 +102,10 @@ on charger
     # Light the power button LED red while charging (off when full)
     write /sys/class/leds/red/trigger battery-charging
 
+# Touch: Onyx driver leaves the touch IRQ off after probe, resetting re-enables it
+on property:sys.boot_completed=1
+    write /sys/devices/platform/soc/988000.i2c/i2c-2/2-0055/reset 1
+
 # Qualcomm crash-dump (download) mode on demand
 on property:vendor.onyx_dump_enable=1
     write /sys/module/msm_poweroff/parameters/download_mode 1
