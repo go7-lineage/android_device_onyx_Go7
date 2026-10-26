@@ -92,6 +92,7 @@ PRODUCT_PACKAGES += \
     init.qti.display_boot.rc \
     init.qti.display_boot.sh \
     libeink_shim \
+    frontlightd \
     vendor.qti.hardware.memtrack-service
 
 PRODUCT_COPY_FILES += \
