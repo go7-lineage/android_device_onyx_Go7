@@ -1,0 +1,95 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Go7 port <go7-port@example.invalid>
+Date: Mon, 26 Oct 2026 21:11:50 +0000
+Subject: [PATCH] sepolicy: allow platform_app to set vendor_frontlight_prop
+
+SystemUI (platform_app) sets and reads the frontlight warmth through
+persist.vendor.go7fl.ct. vendor_public_prop alone is not enough: under
+compatible_property, the coredomain property_service neverallow
+(private/property.te) still matches vendor_property_type, so
+platform_app joins system_writes_vendor_properties_violators, the
+designated exemption attribute for this case.
+
+The public type declaration is mirrored into the frozen
+prebuilts/api/202604 snapshot, as required by the sepolicy freeze test,
+and the compat mapping entries keep the treble tests happy; vendor
+policy resolves the type from that snapshot.
+---
+ prebuilts/api/202604/public/property.te | 2 ++
+ private/compat/202504/202504.ignore.cil | 1 +
+ private/compat/202604/202604.cil        | 2 ++
+ private/platform_app.te                 | 5 +++++
+ public/property.te                      | 2 ++
+ 5 files changed, 12 insertions(+)
+
+diff --git a/prebuilts/api/202604/public/property.te b/prebuilts/api/202604/public/property.te
+index ae2e681..5c93c6a 100644
+--- a/prebuilts/api/202604/public/property.te
++++ b/prebuilts/api/202604/public/property.te
+@@ -287,6 +287,8 @@ system_public_prop(virtual_fingerprint_prop)
+ 
+ vendor_public_prop(persist_vendor_debug_wifi_prop)
+ 
++vendor_public_prop(vendor_frontlight_prop)
++
+ # Properties to select vendor/odm APEXes
+ system_public_prop(apexd_select_prop)
+ 
+diff --git a/private/compat/202504/202504.ignore.cil b/private/compat/202504/202504.ignore.cil
+index a45d73e..4e04838 100644
+--- a/private/compat/202504/202504.ignore.cil
++++ b/private/compat/202504/202504.ignore.cil
+@@ -19,6 +19,7 @@
+     init_dev_config_exec
+     mmd_config_prop
+     native_serial_service
++    vendor_frontlight_prop
+     pbtombstone_exec
+     personal_context_service
+     prefetch
+diff --git a/private/compat/202604/202604.cil b/private/compat/202604/202604.cil
+index b46926a..c8f0a86 100644
+--- a/private/compat/202604/202604.cil
++++ b/private/compat/202604/202604.cil
+@@ -983,6 +983,7 @@
+ (expandtypeattribute (registry_service_202604) true)
+ (expandtypeattribute (remote_auth_service_202604) true)
+ (expandtypeattribute (remote_prov_prop_202604) true)
++(expandtypeattribute (vendor_frontlight_prop_202604) true)
+ (expandtypeattribute (remote_provisioning_service_202604) true)
+ (expandtypeattribute (repair_mode_metadata_file_202604) true)
+ (expandtypeattribute (resourcecache_data_file_202604) true)
+@@ -2432,6 +2433,7 @@
+ (typeattributeset registry_service_202604 (registry_service))
+ (typeattributeset remote_auth_service_202604 (remote_auth_service))
+ (typeattributeset remote_prov_prop_202604 (remote_prov_prop))
++(typeattributeset vendor_frontlight_prop_202604 (vendor_frontlight_prop))
+ (typeattributeset remote_provisioning_service_202604 (remote_provisioning_service))
+ (typeattributeset repair_mode_metadata_file_202604 (repair_mode_metadata_file))
+ (typeattributeset resourcecache_data_file_202604 (resourcecache_data_file))
+diff --git a/private/platform_app.te b/private/platform_app.te
+index 0b36a66..a1e6183 100644
+--- a/private/platform_app.te
++++ b/private/platform_app.te
+@@ -12,3 +12,8 @@ net_domain(platform_app)
+ bluetooth_domain(platform_app)
+ 
+ platform_app_domain(platform_app)
++
++# SystemUI sets and reads the frontlight warmth (persist.vendor.go7fl.ct)
++typeattribute platform_app system_writes_vendor_properties_violators;
++set_prop(platform_app, vendor_frontlight_prop)
++get_prop(platform_app, vendor_frontlight_prop)
+diff --git a/public/property.te b/public/property.te
+index c1d4068..4046fbf 100644
+--- a/public/property.te
++++ b/public/property.te
+@@ -284,6 +284,8 @@ system_public_prop(virtual_fingerprint_prop)
+ 
+ vendor_public_prop(persist_vendor_debug_wifi_prop)
+ 
++vendor_public_prop(vendor_frontlight_prop)
++
+ # Properties to select vendor/odm APEXes
+ system_public_prop(apexd_select_prop)
+ 

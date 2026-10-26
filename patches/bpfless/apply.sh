@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Apply the BPF-less patches to a LineageOS 24.0 tree, safe to re-run
+# Apply port patches to a LineageOS 24.0 tree, safe to re-run
+# usage: apply.sh [topic ...]   (default: all topics: bpfless frontlight)
 set -euo pipefail
 
-PATCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PATCHES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # patches/<dir> -> project path in the tree
 declare -A PROJECTS=(
@@ -10,8 +11,11 @@ declare -A PROJECTS=(
     [packages_modules_Connectivity]=packages/modules/Connectivity
     [system_bpf]=system/bpf
     [system_netd]=system/netd
+    [packages_frameworks_base]=frameworks/base
+    [system_sepolicy]=system/sepolicy
 )
-ORDER=(bionic packages_modules_Connectivity system_bpf system_netd)
+ORDER_bpfless=(bionic packages_modules_Connectivity system_bpf system_netd)
+ORDER_frontlight=(packages_frameworks_base system_sepolicy)
 
 die() { printf '\n*** ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -23,28 +27,38 @@ if ! git config user.email >/dev/null 2>&1; then
     export GIT_COMMITTER_EMAIL="${GIT_COMMITTER_EMAIL:-local@localhost}"
 fi
 
-for dir in "${ORDER[@]}"; do
-    project="${PROJECTS[$dir]}"
-    [[ -d "$project/.git" || -f "$project/.git" ]] || die "$project is not a git checkout"
-    if [[ -d "$(git -C "$project" rev-parse --git-path rebase-apply)" ]]; then
-        die "$project has a git am/rebase in progress; run 'git -C $project am --abort' first"
-    fi
-    [[ -z "$(git -C "$project" status --porcelain --untracked-files=no)" ]] \
-        || die "$project has uncommitted changes; commit or reset them first"
+TOPICS=("$@")
+if (( ${#TOPICS[@]} == 0 )); then
+    TOPICS=(bpfless frontlight)
+fi
 
-    for patch in "$PATCH_DIR/$dir"/*.patch; do
-        name="$(basename "$patch")"
-        if git -C "$project" apply --check --reverse "$patch" >/dev/null 2>&1; then
-            echo "skip    $project: $name (already applied)"
-            continue
+for topic in "${TOPICS[@]}"; do
+    [[ -d "$PATCHES_ROOT/$topic" ]] || die "unknown topic: $topic"
+    declare -n ORDER="ORDER_$topic"
+
+    for dir in "${ORDER[@]}"; do
+        project="${PROJECTS[$dir]}"
+        [[ -d "$project/.git" || -f "$project/.git" ]] || die "$project is not a git checkout"
+        if [[ -d "$(git -C "$project" rev-parse --git-path rebase-apply)" ]]; then
+            die "$project has a git am/rebase in progress; run 'git -C $project am --abort' first"
         fi
-        if ! git -C "$project" -c commit.gpgsign=false am --3way "$patch"; then
-            git -C "$project" am --abort || true
-            die "$name failed to apply to $project (git am error above)."
-        fi
-        echo "applied $project: $name"
+        [[ -z "$(git -C "$project" status --porcelain --untracked-files=no)" ]] \
+            || die "$project has uncommitted changes; commit or reset them first"
+
+        for patch in "$PATCHES_ROOT/$topic/$dir"/*.patch; do
+            name="$(basename "$patch")"
+            if git -C "$project" apply --check --reverse "$patch" >/dev/null 2>&1; then
+                echo "skip    $project: $name (already applied)"
+                continue
+            fi
+            if ! git -C "$project" -c commit.gpgsign=false am --3way "$patch"; then
+                git -C "$project" am --abort || true
+                die "$name failed to apply to $project (git am error above)."
+            fi
+            echo "applied $project: $name"
+        done
     done
 done
 
 echo
-echo "All BPF-less patches are applied."
+echo "All patches applied (${TOPICS[*]})."
