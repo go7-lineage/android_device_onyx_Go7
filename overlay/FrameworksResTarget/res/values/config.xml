@@ -14,4 +14,6 @@
 
     <!-- E-ink: don't zoom the wallpaper when opening shade or apps (match stock) -->
     <item name="config_wallpaperMaxScale" format="float" type="dimen">1.0</item>
+
+    <bool name="config_automatic_brightness_available">false</bool>
 </resources>
