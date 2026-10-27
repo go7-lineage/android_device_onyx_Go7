@@ -14,6 +14,10 @@ PRODUCT_COPY_FILES += \
 # Inherit from Go7 device
 $(call inherit-product, device/onyx/Go7/device.mk)
 
+# must be set before the inherit below, Lineage reads it while parsing common_mobile_full.mk
+PRODUCT_NO_CAMERA := true
+PRODUCT_PACKAGES += go7_no_camera
+
 # Inherit some common Lineage stuff.
 $(call inherit-product, vendor/lineage/config/common_full_tablet_wifionly.mk)
 
