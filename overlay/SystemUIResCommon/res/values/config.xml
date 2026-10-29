@@ -7,12 +7,11 @@
     <!-- E-ink: no animated privacy dot in the status bar (match stock) -->
     <bool name="config_enablePrivacyDot">false</bool>
 
-    <string name="quick_settings_tiles_default" translatable="false">wifi,bt,caffeine</string>
-    <string name="quick_settings_tiles_default_split" translatable="false">wifi,bt,caffeine</string>
+    <string name="quick_settings_tiles_default" translatable="false">internet,bt,caffeine,custom(io.github.go7_lineage.einkshim/io.github.go7_lineage.einkshim.ModeTile)</string>
+    <string name="quick_settings_tiles_default_split" translatable="false">wifi,bt,caffeine,custom(io.github.go7_lineage.einkshim/io.github.go7_lineage.einkshim.ModeTile)</string>
     <string-array name="quick_settings_large_tiles_default_split" translatable="false">
-        <item>wifi</item>
-        <item>bt</item>
         <item>caffeine</item>
+        <item>custom(io.github.go7_lineage.einkshim/io.github.go7_lineage.einkshim.ModeTile)</item>
     </string-array>
 
     <!-- no minimum-tiles restriction -->
