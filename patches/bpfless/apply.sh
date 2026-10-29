@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Apply port patches to a LineageOS 24.0 tree, safe to re-run
-# usage: apply.sh [topic ...]   (default: all topics: bpfless frontlight)
+# usage: apply.sh [topic ...]   (default: all topics: bpfless frontlight eink)
 set -euo pipefail
 
 PATCHES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -16,6 +16,8 @@ declare -A PROJECTS=(
 )
 ORDER_bpfless=(bionic packages_modules_Connectivity system_bpf system_netd)
 ORDER_frontlight=(packages_frameworks_base system_sepolicy)
+# eink's sepolicy patch applies on top of frontlight's, keep it after
+ORDER_eink=(system_sepolicy)
 
 die() { printf '\n*** ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -29,7 +31,7 @@ fi
 
 TOPICS=("$@")
 if (( ${#TOPICS[@]} == 0 )); then
-    TOPICS=(bpfless frontlight)
+    TOPICS=(bpfless frontlight eink)
 fi
 
 for topic in "${TOPICS[@]}"; do
