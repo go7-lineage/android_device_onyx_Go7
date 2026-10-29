@@ -164,6 +164,7 @@ $(call soong_config_set_bool,stagefright,target_disable_thumbnail_block_model,tr
 PRODUCT_ENFORCE_RRO_TARGETS := *
 PRODUCT_PACKAGES += \
     FrameworksResCommon \
+    FrameworksResProduct \
     FrameworksResTarget \
     LineageSettingsProviderOverlayFP4 \
     NcmTetheringOverlay \
