@@ -16,4 +16,6 @@
 
     <!-- 0 == off, 3 == on -->
     <integer name="def_location_mode">0</integer>
+
+    <integer name="def_heads_up_enabled">0</integer>
 </resources>
