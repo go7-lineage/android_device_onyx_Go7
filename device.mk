@@ -151,6 +151,10 @@ $(call soong_config_set,lineage_health,charging_control_limit_stop_path,/sys/cla
 PRODUCT_PACKAGES += \
     vendor.lineage.health-service.default
 
+# Lights
+PRODUCT_PACKAGES += \
+    android.hardware.light-service.lineage
+
 # Media
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/media/media_codecs_c2.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_codecs_c2.xml \
@@ -166,6 +170,7 @@ PRODUCT_PACKAGES += \
     FrameworksResCommon \
     FrameworksResProduct \
     FrameworksResTarget \
+    LineageSdkResCommon \
     LineageSettingsProviderOverlayFP4 \
     NcmTetheringOverlay \
     SettingsProviderResCommon \

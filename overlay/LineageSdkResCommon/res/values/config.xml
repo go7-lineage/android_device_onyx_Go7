@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <!-- Bit field of lineage-sdk LightsCapabilities, without it the framework
+         never drives the battery light. 64 = LIGHTS_BATTERY_LED -->
+    <integer name="config_deviceLightCapabilities">64</integer>
+</resources>
