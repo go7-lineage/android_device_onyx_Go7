@@ -12,4 +12,7 @@
     <fraction name="def_window_transition_scale">0%</fraction>
 
     <integer name="def_screen_off_timeout">300000</integer>
+
+    <!-- 0 == off, 3 == on -->
+    <integer name="def_location_mode">0</integer>
 </resources>
