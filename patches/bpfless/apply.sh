@@ -17,7 +17,7 @@ declare -A PROJECTS=(
 ORDER_bpfless=(bionic packages_modules_Connectivity system_bpf system_netd)
 ORDER_frontlight=(packages_frameworks_base system_sepolicy)
 # eink's sepolicy patch applies on top of frontlight's, keep it after
-ORDER_eink=(system_sepolicy)
+ORDER_eink=(packages_frameworks_base system_sepolicy)
 
 die() { printf '\n*** ERROR: %s\n' "$*" >&2; exit 1; }
 
