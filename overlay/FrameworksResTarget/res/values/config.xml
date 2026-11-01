@@ -20,4 +20,7 @@
     <!-- E-ink: no elevation shadows, the grey gradients dither badly -->
     <item type="dimen" format="float" name="ambient_shadow_alpha">0</item>
     <item type="dimen" format="float" name="spot_shadow_alpha">0</item>
+
+    <!-- E-ink: no screensaver -->
+    <bool name="config_dreamsSupported">false</bool>
 </resources>
